@@ -1,6 +1,8 @@
+// Importa Firebase App e Realtime Database
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
 import { getDatabase, ref, set, push, onChildAdded, get } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
+// Configuração do Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyD4PrkEaK0aOx14YR7JgYqcRpe2GaFxPRE",
   authDomain: "chat-publico-enibs.firebaseapp.com",
@@ -12,11 +14,13 @@ const firebaseConfig = {
   measurementId: "G-Z2R3ZLGGZN"
 };
 
+// Inicializa Firebase
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-// === LOGIN ===
+// ================= LOGIN =================
 const loginBtn = document.getElementById("loginBtn");
+
 loginBtn.addEventListener("click", async () => {
   const nome = document.getElementById("nome").value.trim();
   const senha = document.getElementById("senha").value.trim();
@@ -43,6 +47,7 @@ loginBtn.addEventListener("click", async () => {
   }
 });
 
+// ================= CHAT =================
 function iniciarChat(nome) {
   document.getElementById("login").style.display = "none";
   document.getElementById("chat").style.display = "block";
@@ -51,6 +56,7 @@ function iniciarChat(nome) {
   const mensagensRef = ref(db, "mensagens");
   const mensagensDiv = document.getElementById("mensagens");
 
+  // Recebe mensagens em tempo real
   onChildAdded(mensagensRef, (data) => {
     const msg = data.val();
     const div = document.createElement("div");
@@ -59,6 +65,7 @@ function iniciarChat(nome) {
     mensagensDiv.scrollTop = mensagensDiv.scrollHeight;
   });
 
+  // Envia mensagem
   document.getElementById("enviarBtn").addEventListener("click", () => {
     const msgInput = document.getElementById("mensagemInput");
     const texto = msgInput.value.trim();
@@ -67,4 +74,4 @@ function iniciarChat(nome) {
       msgInput.value = "";
     }
   });
-}
+  }

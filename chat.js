@@ -1,8 +1,6 @@
-// chat.js
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-import { getDatabase, ref, push, onChildAdded, get } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+import { getDatabase, ref, set, push, onChildAdded, get } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
-// === Configuração do Firebase ===
 const firebaseConfig = {
   apiKey: "AIzaSyD4PrkEaK0aOx14YR7JgYqcRpe2GaFxPRE",
   authDomain: "chat-publico-enibs.firebaseapp.com",
@@ -14,76 +12,59 @@ const firebaseConfig = {
   measurementId: "G-Z2R3ZLGGZN"
 };
 
-// Inicializa Firebase
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-// Elementos HTML
-const loginDiv = document.getElementById("login");
-const chatDiv = document.getElementById("chat");
-const usernameInput = document.getElementById("username");
-const passwordInput = document.getElementById("password");
+// === LOGIN ===
 const loginBtn = document.getElementById("loginBtn");
-const loginError = document.getElementById("loginError");
-
-const messagesDiv = document.getElementById("messages");
-const messageInput = document.getElementById("messageInput");
-const sendBtn = document.getElementById("sendBtn");
-const currentUserSpan = document.getElementById("currentUser");
-
-loginDiv.style.display = "block";
-
-let currentUser = "";
-
-// Login ou registro
 loginBtn.addEventListener("click", async () => {
-  const username = usernameInput.value.trim();
-  const password = passwordInput.value.trim();
-  loginError.textContent = "";
+  const nome = document.getElementById("nome").value.trim();
+  const senha = document.getElementById("senha").value.trim();
 
-  if (!username || !password) return;
+  if (!nome || !senha) {
+    alert("Preencha todos os campos!");
+    return;
+  }
 
-  const userRef = ref(db, "users/" + username);
+  const userRef = ref(db, "usuarios/" + nome);
   const snapshot = await get(userRef);
 
   if (snapshot.exists()) {
-    if (snapshot.val().password === password) {
-      loginSuccess(username);
+    const dados = snapshot.val();
+    if (dados.senha === senha) {
+      iniciarChat(nome);
     } else {
-      loginError.textContent = "Senha incorreta!";
+      alert("Senha incorreta!");
     }
   } else {
-    // Cria usuário novo
-    await push(ref(db, "users/" + username), { password });
-    loginSuccess(username);
+    await set(userRef, { senha });
+    alert("Conta criada com sucesso!");
+    iniciarChat(nome);
   }
 });
 
-function loginSuccess(username) {
-  currentUser = username;
-  currentUserSpan.textContent = currentUser;
-  loginDiv.style.display = "none";
-  chatDiv.style.display = "block";
-  listenMessages();
-}
+function iniciarChat(nome) {
+  document.getElementById("login").style.display = "none";
+  document.getElementById("chat").style.display = "block";
+  document.getElementById("userName").innerText = nome;
 
-// Enviar mensagem
-sendBtn.addEventListener("click", () => {
-  const text = messageInput.value.trim();
-  if (text) {
-    push(ref(db, "chat"), { user: currentUser, text: text });
-    messageInput.value = "";
-  }
-});
+  const mensagensRef = ref(db, "mensagens");
+  const mensagensDiv = document.getElementById("mensagens");
 
-// Receber mensagens
-function listenMessages() {
-  const messagesRef = ref(db, "chat");
-  onChildAdded(messagesRef, (snapshot) => {
-    const msg = snapshot.val();
-    const p = document.createElement("p");
-    p.textContent = `${msg.user}: ${msg.text}`;
-    messagesDiv.appendChild(p);
-    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+  onChildAdded(mensagensRef, (data) => {
+    const msg = data.val();
+    const div = document.createElement("div");
+    div.textContent = `${msg.nome}: ${msg.texto}`;
+    mensagensDiv.appendChild(div);
+    mensagensDiv.scrollTop = mensagensDiv.scrollHeight;
   });
-  }
+
+  document.getElementById("enviarBtn").addEventListener("click", () => {
+    const msgInput = document.getElementById("mensagemInput");
+    const texto = msgInput.value.trim();
+    if (texto) {
+      push(mensagensRef, { nome, texto });
+      msgInput.value = "";
+    }
+  });
+}

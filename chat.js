@@ -2,7 +2,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
 import { getDatabase, ref, set, push, onChildAdded, get } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
-// Configuração do Firebase
+// ======== Configuração do Firebase ========
 const firebaseConfig = {
   apiKey: "AIzaSyD4PrkEaK0aOx14YR7JgYqcRpe2GaFxPRE",
   authDomain: "chat-publico-enibs.firebaseapp.com",
@@ -18,7 +18,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-// ================= LOGIN =================
+// ======== Login ========
 const loginBtn = document.getElementById("loginBtn");
 
 loginBtn.addEventListener("click", async () => {
@@ -47,11 +47,10 @@ loginBtn.addEventListener("click", async () => {
   }
 });
 
-// ================= CHAT =================
+// ======== Chat ========
 function iniciarChat(nome) {
-  document.getElementById("login").style.display = "none";
-  document.getElementById("chat").style.display = "block";
-  document.getElementById("userName").innerText = nome;
+  // Mostra o chat
+  abrirTela("chat");
 
   const mensagensRef = ref(db, "mensagens");
   const mensagensDiv = document.getElementById("mensagens");
@@ -60,18 +59,19 @@ function iniciarChat(nome) {
   onChildAdded(mensagensRef, (data) => {
     const msg = data.val();
     const div = document.createElement("div");
-    div.textContent = `${msg.nome}: ${msg.texto}`;
+    div.textContent = `${msg.usuario}: ${msg.texto}`;
     mensagensDiv.appendChild(div);
     mensagensDiv.scrollTop = mensagensDiv.scrollHeight;
   });
 
   // Envia mensagem
-  document.getElementById("enviarBtn").addEventListener("click", () => {
+  const enviarBtn = document.getElementById("enviarBtn");
+  enviarBtn.addEventListener("click", () => {
     const msgInput = document.getElementById("mensagemInput");
     const texto = msgInput.value.trim();
     if (texto) {
-      push(mensagensRef, { nome, texto });
+      push(mensagensRef, { usuario: nome, texto });
       msgInput.value = "";
     }
   });
-  }
+                          }

@@ -1,8 +1,10 @@
-// Importa Firebase App e Realtime Database
+// ===================== CHAT.JS =====================
+
+// Importa Firebase
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
 import { getDatabase, ref, set, push, onChildAdded, get } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
-// ======== Configuração do Firebase ========
+// ======== Configuração Firebase ========
 const firebaseConfig = {
   apiKey: "AIzaSyD4PrkEaK0aOx14YR7JgYqcRpe2GaFxPRE",
   authDomain: "chat-publico-enibs.firebaseapp.com",
@@ -14,64 +16,59 @@ const firebaseConfig = {
   measurementId: "G-Z2R3ZLGGZN"
 };
 
-// Inicializa Firebase
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-// ======== Login ========
-const loginBtn = document.getElementById("loginBtn");
+let usuarioAtual = null;
 
+// ======== Botão de Login ========
+const loginBtn = document.getElementById("loginBtn");
 loginBtn.addEventListener("click", async () => {
   const nome = document.getElementById("nome").value.trim();
   const senha = document.getElementById("senha").value.trim();
 
-  if (!nome || !senha) {
-    alert("Preencha todos os campos!");
-    return;
-  }
+  if (!nome || !senha) { alert("Preencha todos os campos!"); return; }
 
   const userRef = ref(db, "usuarios/" + nome);
   const snapshot = await get(userRef);
 
   if (snapshot.exists()) {
-    const dados = snapshot.val();
-    if (dados.senha === senha) {
-      iniciarChat(nome);
+    if (snapshot.val().senha === senha) {
+      usuarioAtual = nome;
+      alert("Login realizado como " + nome);
+      abrirTela("chat");
     } else {
       alert("Senha incorreta!");
     }
   } else {
     await set(userRef, { senha });
+    usuarioAtual = nome;
     alert("Conta criada com sucesso!");
-    iniciarChat(nome);
+    abrirTela("chat");
   }
 });
 
-// ======== Chat ========
-function iniciarChat(nome) {
-  // Mostra o chat
-  abrirTela("chat");
+// ======== Enviar Mensagem ========
+const enviarBtn = document.getElementById("enviarBtn");
+enviarBtn.addEventListener("click", async () => {
+  if (!usuarioAtual) { alert("Entre antes de enviar mensagens"); return; }
 
-  const mensagensRef = ref(db, "mensagens");
-  const mensagensDiv = document.getElementById("mensagens");
+  const msgInput = document.getElementById("mensagemInput");
+  const texto = msgInput.value.trim();
+  if (!texto) return;
 
-  // Recebe mensagens em tempo real
-  onChildAdded(mensagensRef, (data) => {
-    const msg = data.val();
-    const div = document.createElement("div");
-    div.textContent = `${msg.usuario}: ${msg.texto}`;
-    mensagensDiv.appendChild(div);
-    mensagensDiv.scrollTop = mensagensDiv.scrollHeight;
-  });
+  await push(ref(db, "mensagens"), { usuario: usuarioAtual, texto });
+  msgInput.value = "";
+});
 
-  // Envia mensagem
-  const enviarBtn = document.getElementById("enviarBtn");
-  enviarBtn.addEventListener("click", () => {
-    const msgInput = document.getElementById("mensagemInput");
-    const texto = msgInput.value.trim();
-    if (texto) {
-      push(mensagensRef, { usuario: nome, texto });
-      msgInput.value = "";
-    }
-  });
-                          }
+// ======== Receber Mensagens ========
+const mensagensDiv = document.getElementById("mensagens");
+const mensagensRef = ref(db, "mensagens");
+
+onChildAdded(mensagensRef, (data) => {
+  const msg = data.val();
+  const div = document.createElement("div");
+  div.textContent = `${msg.usuario}: ${msg.texto}`;
+  mensagensDiv.appendChild(div);
+  mensagensDiv.scrollTop = mensagensDiv.scrollHeight;
+});

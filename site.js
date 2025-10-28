@@ -1,4 +1,6 @@
-// ======== Variáveis ========
+// ===================== SITE.JS =====================
+
+// ======== Variáveis e respostas ========
 let faseAtual = 1;
 const totalFases = 30;
 const respostas = ["","a noite caiu","silêncio dominou tudo","nada se move","só a verdade permaneceu","mentiras desmoronaram rápido","restou apenas poeira","invenção","ninguém entendeu o que estava ali","deltarune","calendário juliano","blox fruits","vazio","luz","perfluorcarbono","cicata","bagdá","lua","loucura","contemplação","liberdade"];
@@ -7,24 +9,24 @@ function removerAcentos(str){
   return str.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
 }
 
-// ======== Controle de telas ========
+// ======== Função de abrir tela ========
 function abrirTela(id){
-  document.querySelectorAll(".tela").forEach(el=>el.classList.remove("ativa"));
+  document.querySelectorAll(".tela").forEach(el => el.classList.remove("ativa"));
   document.getElementById(id).classList.add("ativa");
-  if(id==="fases") carregarFases();
-  if(id==="jogo") atualizarTelaJogo();
+  if(id === "fases") carregarFases();
+  if(id === "jogo") atualizarTelaJogo();
 }
 
 // ======== Fases ========
 function carregarFases(){
   const container = document.getElementById("fasesContainer");
   container.innerHTML = "";
-  for(let i=1;i<=totalFases;i+=4){
+  for(let i = 1; i <= totalFases; i += 4){
     const grupo = document.createElement("div");
     grupo.className = "grupo-fase";
-    for(let j=0;j<4;j++){
-      const faseNum = i+j;
-      if(faseNum>totalFases) break;
+    for(let j = 0; j < 4; j++){
+      const faseNum = i + j;
+      if(faseNum > totalFases) break;
       const botao = document.createElement("button");
       botao.textContent = "Fase " + faseNum;
       botao.className = "fase-botao";
@@ -37,7 +39,10 @@ function carregarFases(){
 }
 
 function abrirFase(num){
-  if(num <= faseAtual){ faseAtual = num; abrirTela("jogo"); }
+  if(num <= faseAtual){
+    faseAtual = num;
+    abrirTela("jogo");
+  }
 }
 
 function atualizarTelaJogo(){
@@ -59,26 +64,30 @@ function proximaFase(){
   }
 }
 
-// ======== Botões ========
+// ======== Botões e efeito de clique ========
 const clickSound = document.getElementById("clickSound");
-
-document.querySelectorAll(".botao").forEach(botao=>{
+document.querySelectorAll(".botao").forEach(botao => {
   botao.addEventListener("click", ()=>{
-    if(clickSound){ clickSound.currentTime=0; clickSound.play(); }
+    if(!botao.disabled && clickSound){
+      clickSound.currentTime = 0; 
+      clickSound.play();
+    }
     botao.classList.add("clicado");
-    setTimeout(()=>botao.classList.remove("clicado"),100);
+    setTimeout(()=> botao.classList.remove("clicado"), 100);
   });
 });
 
-document.querySelector(".botao-jogar").addEventListener("click", ()=> abrirTela("jogo"));
-document.querySelector(".botao-fases").addEventListener("click", ()=> abrirTela("fases"));
-document.querySelector(".botao-config").addEventListener("click", ()=> abrirTela("config"));
-document.querySelector(".botao-chat").addEventListener("click", ()=> abrirTela("chat"));
-document.querySelectorAll(".botao-voltar").forEach(b=> b.addEventListener("click", ()=> abrirTela("inicio")));
-document.querySelector(".botao-responder").addEventListener("click", proximaFase);
+// Navegação botões principais
+document.querySelector(".botao-jogar")?.addEventListener("click", ()=> abrirTela("jogo"));
+document.querySelector(".botao-fases")?.addEventListener("click", ()=> abrirTela("fases"));
+document.querySelector(".botao-config")?.addEventListener("click", ()=> abrirTela("config"));
+document.querySelector(".botao-chat")?.addEventListener("click", ()=> abrirTela("chat"));
+document.querySelectorAll(".botao-voltar").forEach(b => b.addEventListener("click", ()=> abrirTela("inicio")));
+document.querySelector(".botao-responder")?.addEventListener("click", proximaFase);
 
 // ======== Matrix (opcional) ========
 const canvas = document.getElementById("matrixCanvas");
 const ctx = canvas.getContext("2d");
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
+// Você pode adicionar a animação da matrix aqui, mantendo seu estilo.

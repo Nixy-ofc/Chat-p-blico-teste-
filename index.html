@@ -2,36 +2,75 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8">
-  <title>Chat Público</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat Público Beta</title>
   <style>
-    body { font-family: Arial; margin: 20px; }
-    #login, #chat { display: none; }
-    #messages { border: 1px solid #ccc; padding: 10px; height: 300px; overflow-y: scroll; margin-bottom: 10px; }
-    #messageInput { width: 80%; padding: 5px; }
-    #sendBtn { width: 18%; padding: 5px; }
-    #login input { margin-bottom: 10px; padding: 5px; width: 200px; }
-    #login button { padding: 5px 10px; }
+    body {
+      background-color: #0e0e0e;
+      color: white;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+
+    input, button {
+      margin: 8px;
+      padding: 10px;
+      border: none;
+      border-radius: 6px;
+    }
+
+    input {
+      width: 80%;
+      max-width: 300px;
+    }
+
+    button {
+      background-color: #0088ff;
+      color: white;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    button:hover {
+      background-color: #006fd6;
+    }
+
+    #chat {
+      display: none;
+      max-width: 600px;
+      margin: 0 auto;
+      text-align: left;
+      background: #1b1b1b;
+      padding: 15px;
+      border-radius: 8px;
+      overflow-y: auto;
+      height: 400px;
+    }
+
+    #mensagemInput {
+      width: 70%;
+    }
   </style>
 </head>
 <body>
+  <h1>Chat Público Beta</h1>
+  <p><b>Aviso:</b> Este chat está em fase beta. Não me responsabilizo por qualquer perda de dados. Ao continuar, você aceita os termos de uso.</p>
 
   <div id="login">
-    <h2>Login / Registro</h2>
-    <input type="text" id="username" placeholder="Nome de usuário"><br>
-    <input type="password" id="password" placeholder="Senha"><br>
+    <input id="nome" placeholder="Seu nome">
+    <input id="senha" type="password" placeholder="Sua senha">
     <button id="loginBtn">Entrar</button>
-    <p id="loginError" style="color:red;"></p>
   </div>
 
   <div id="chat">
-    <h2>Chat Público</h2>
-    <div id="messages"></div>
-    <input type="text" id="messageInput" placeholder="Digite sua mensagem...">
-    <button id="sendBtn">Enviar</button>
-    <p>Usuário logado: <span id="currentUser"></span></p>
+    <h2>Bem-vindo, <span id="userName"></span>!</h2>
+    <div id="mensagens"></div>
+
+    <input id="mensagemInput" placeholder="Digite uma mensagem">
+    <button id="enviarBtn">Enviar</button>
   </div>
 
-  <!-- Firebase SDK -->
   <script type="module" src="chat.js"></script>
 </body>
 </html>

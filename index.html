@@ -4,35 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Menu Enigmático</title>
-<style>
-  *{margin:0;padding:0;box-sizing:border-box;}
-  html,body{width:100%;height:100%;font-family:'Courier New', monospace;background:black;color:white;overflow:hidden;}
-  canvas{position:fixed;top:0;left:0;z-index:0;}
-  .tela{position:absolute;top:0;left:0;width:100%;height:100%;display:none;flex-direction:column;align-items:center;overflow-y:auto;z-index:1;}
-  .ativa{display:flex;}
-  #inicio{justify-content:center;background:transparent;}
-  .overlay{background: rgba(0,0,0,0.85); padding-top:80px;}
-  .botao{background:transparent;border:2px solid white;color:white;padding:10px 30px;margin:10px;cursor:pointer;transition:0.3s;user-select:none;}
-  .botao:hover{background:white;color:black;}
-  @keyframes piscarBranco{0%{background:white;color:black;}100%{background:transparent;color:white;}}
-  .botao.clicado{animation:piscarBranco 0.1s forwards;}
-  .logo{font-size:40px;margin-bottom:30px;font-weight:bold;}
-  .fases-container{display:flex;overflow-x:auto;width:90%;padding:20px;gap:20px;flex-wrap:nowrap;}
-  .grupo-fase{display:grid;grid-template-columns:repeat(2,100px);grid-template-rows:repeat(2,100px);gap:10px;background:#111;padding:10px;border:1px solid white;min-width:240px;}
-  .fase-botao{background:transparent;border:1px solid white;color:white;font-size:16px;cursor:pointer;}
-  .fase-botao:disabled{color:#777;border-color:#555;cursor:not-allowed;}
-  .voltar{position:absolute;top:10px;left:10px;font-size:12px;padding:4px 8px;}
-  .img-fase{display:inline-block;width:300px;height:auto;border:2px solid white;margin-bottom:20px;object-fit:contain;background:transparent;padding:0;}
-  #numeroFase{font-size:14px;margin-bottom:8px;color:white;font-weight:normal;user-select:none;}
-  .resposta-input{margin-top:20px;padding:10px;font-size:16px;width:80%;max-width:300px;background:#000;color:white;border:1px solid white;text-align:center;}
-
-  /* Chat */
-  #chat{display:none;flex-direction:column;align-items:center;background: rgba(0,0,0,0.85);width:100%;height:100%;padding:60px 20px 20px 20px;overflow-y:auto;}
-  #mensagens{width:90%;max-width:500px;height:300px;background:#111;border:2px solid white;padding:10px;overflow-y:auto;margin-bottom:10px;}
-  #mensagemInput,#nome,#senha{width:70%;padding:10px;border:1px solid white;background:#000;color:white;margin-bottom:10px;}
-  #enviarBtn,#loginBtn{border:1px solid white;background:transparent;color:white;cursor:pointer;padding:10px 20px;margin-bottom:10px;}
-  #enviarBtn:hover,#loginBtn:hover{background:white;color:black;}
-</style>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 <canvas id="matrixCanvas"></canvas>
@@ -41,31 +13,31 @@
 <!-- INICIO -->
 <div id="inicio" class="tela ativa">
   <div class="logo">ENIGMA</div>
-  <button class="botao" onclick="abrirTela('jogo')">Jogar</button>
-  <button class="botao" onclick="abrirTela('fases')">Fases</button>
-  <button class="botao" onclick="abrirTela('config')">Configurações</button>
-  <button class="botao" onclick="abrirTela('chat')">Chat Público</button>
+  <button class="botao botao-jogar">Jogar</button>
+  <button class="botao botao-fases">Fases</button>
+  <button class="botao botao-config">Configurações</button>
+  <button class="botao botao-chat">Chat Público</button>
 </div>
 
 <!-- JOGO -->
 <div id="jogo" class="tela overlay">
-  <button class="botao voltar" onclick="abrirTela('inicio')">← Voltar</button>
+  <button class="botao voltar botao-voltar">← Voltar</button>
   <div id="numeroFase">fase 1</div>
   <img id="imagemFase" class="img-fase" src="imagem1.jpg" alt="Imagem da Fase" />
   <input class="resposta-input" placeholder="Digite sua resposta..." />
-  <button class="botao" onclick="proximaFase()">Responder</button>
+  <button class="botao botao-responder">Responder</button>
 </div>
 
 <!-- FASES -->
 <div id="fases" class="tela overlay">
-  <button class="botao voltar" onclick="abrirTela('inicio')">← Voltar</button>
+  <button class="botao voltar botao-voltar">← Voltar</button>
   <h2>Fases</h2>
   <div class="fases-container" id="fasesContainer"></div>
 </div>
 
 <!-- CONFIG -->
 <div id="config" class="tela overlay">
-  <button class="botao voltar" onclick="abrirTela('inicio')">← Voltar</button>
+  <button class="botao voltar botao-voltar">← Voltar</button>
   <h2>Configurações</h2>
   <div class="controle-volume">
     Volume: <input type="range" min="0" max="100" value="50" />
@@ -74,7 +46,7 @@
 
 <!-- CHAT -->
 <div id="chat" class="tela">
-  <button class="botao voltar" onclick="abrirTela('inicio')">← Voltar</button>
+  <button class="botao voltar botao-voltar">← Voltar</button>
   <h2>Chat Público Beta</h2>
   <div id="mensagens"></div>
   <input id="mensagemInput" placeholder="Digite uma mensagem..." />
@@ -84,104 +56,8 @@
   <button id="loginBtn">Entrar / Criar conta</button>
 </div>
 
-<script type="module">
-  // ========== CHAT.JS ==========
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-  import { getDatabase, ref, set, push, onValue, get } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyD4PrkEaK0aOx14YR7JgYqcRpe2GaFxPRE",
-    authDomain: "chat-publico-enibs.firebaseapp.com",
-    databaseURL: "https://chat-publico-enibs-default-rtdb.firebaseio.com",
-    projectId: "chat-publico-enibs",
-    storageBucket: "chat-publico-enibs.firebasestorage.app",
-    messagingSenderId: "945844062871",
-    appId: "1:945844062871:web:fd185925432b2de831f7d2",
-    measurementId: "G-Z2R3ZLGGZN"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
-
-  let usuarioAtual = null;
-
-  const loginBtn = document.getElementById("loginBtn");
-  const enviarBtn = document.getElementById("enviarBtn");
-
-  loginBtn.onclick = async ()=>{
-    const nome = document.getElementById("nome").value.trim();
-    const senha = document.getElementById("senha").value;
-    if(!nome || !senha){alert("Preencha nome e senha"); return;}
-    const userRef = ref(db,"usuarios/"+nome);
-    const snapshot = await get(userRef);
-    if(snapshot.exists()){
-      if(snapshot.val().senha !== senha){alert("Senha incorreta"); return;}
-    }else{
-      await set(userRef,{senha});
-    }
-    usuarioAtual = nome;
-    alert("Login realizado como "+nome);
-  };
-
-  enviarBtn.onclick = async ()=>{
-    if(!usuarioAtual){alert("Entre antes de enviar mensagens"); return;}
-    const texto = document.getElementById("mensagemInput").value.trim();
-    if(!texto) return;
-    await push(ref(db,"mensagens"),{usuario:usuarioAtual,texto});
-    document.getElementById("mensagemInput").value="";
-  };
-
-  const mensagensDiv = document.getElementById("mensagens");
-  const mensagensRef = ref(db,"mensagens");
-  onValue(mensagensRef,(snapshot)=>{
-    mensagensDiv.innerHTML="";
-    snapshot.forEach(snap=>{
-      const div = document.createElement("div");
-      div.textContent = snap.val().usuario+": "+snap.val().texto;
-      mensagensDiv.appendChild(div);
-    });
-    mensagensDiv.scrollTop = mensagensDiv.scrollHeight;
-  });
-
-  // ========== SITE.JS ==========
-  function abrirTela(id){
-    document.querySelectorAll(".tela").forEach(el=>el.classList.remove("ativa"));
-    document.getElementById(id).classList.add("ativa");
-    if(id==="fases") carregarFases();
-    if(id==="jogo") atualizarTelaJogo();
-  }
-
-  document.querySelectorAll('.botao').forEach(botao=>{
-    botao.addEventListener('click',()=>{
-      const som=document.getElementById('clickSound');
-      if(som){som.currentTime=0; som.play();}
-      botao.classList.add('clicado');
-      setTimeout(()=>botao.classList.remove('clicado'),100);
-    });
-  });
-
-  let faseAtual=1;
-  const totalFases=30;
-  const respostas=["","a noite caiu","silêncio dominou tudo","nada se move","só a verdade permaneceu","mentiras desmoronaram rápido","restou apenas poeira","invenção","ninguém entendeu o que estava ali","deltarune","calendário juliano","blox fruits","vazio","luz","perfluorcarbono","cicata","bagdá","lua","loucura","contemplação","liberdade"];
-
-  function removerAcentos(str){return str.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();}
-  function carregarFases(){const container=document.getElementById("fasesContainer");container.innerHTML="";
-    for(let i=1;i<=totalFases;i+=4){const grupo=document.createElement("div");grupo.className="grupo-fase";
-      for(let j=0;j<4;j++){const faseNum=i+j;if(faseNum>totalFases) break;
-        const botao=document.createElement("button"); botao.textContent="Fase "+faseNum; botao.className="fase-botao";
-        botao.disabled=faseNum>faseAtual; botao.onclick=()=>abrirFase(faseNum); grupo.appendChild(botao);}
-      container.appendChild(grupo);}
-  }
-  function abrirFase(num){if(num<=faseAtual){faseAtual=num; abrirTela("jogo");}}
-  function atualizarTelaJogo(){document.getElementById("numeroFase").textContent=`fase ${faseAtual}`;
-    const img=document.getElementById("imagemFase"); img.src=`imagem${faseAtual}.jpg`; img.alt=`Imagem da Fase ${faseAtual}`;
-    document.querySelector(".resposta-input").value="";
-  }
-  function proximaFase(){const input=document.querySelector(".resposta-input"); const respostaUser=removerAcentos(input.value.trim());
-    if(faseAtual<respostas.length && respostaUser===removerAcentos(respostas[faseAtual])){faseAtual++; atualizarTelaJogo();}else{alert("Resposta incorreta. Tente novamente.");}
-  }
-
-  // Matrix
-  const canvas=document.getElementById("matrixCanvas"); const ctx=canvas.getContext("2d");
-  canvas.width=window.innerWidth; canvas.height=window.innerHeight;
-  const letras="01@#$%&*
+<!-- SCRIPTS -->
+<script src="site.js" type="module"></script>
+<script src="chat.js" type="module"></script>
+</body>
+</html>
